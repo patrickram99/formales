@@ -1,0 +1,15 @@
+class PromptValidator
+
+instance variables
+    private grammar : PromptGrammar := new PromptGrammar();
+
+operations
+    public PromptValidator: () ==> PromptValidator
+    PromptValidator() ==
+        return self;
+
+    public validate: Prompt ==> bool
+    validate(prompt) ==
+        return prompt.isValid() and grammar.isValidPrompt(prompt);
+
+end PromptValidator

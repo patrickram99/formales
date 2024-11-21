@@ -1,0 +1,66 @@
+class Prompt
+
+types
+    public TokenType = <INSTRUCTION> | <CONTEXT> | <EXAMPLE> | <CONSTRAINT> | <OUTPUT_FORMAT>;
+    
+    public Token :: 
+        type : TokenType
+        value : seq of char;
+
+instance variables
+    public instructions : seq of Token;
+    public context : seq of Token;
+    public examples : seq of Token;
+    public constraints : seq of Token;
+    public outputFormat : seq of Token;
+
+operations
+    public Prompt: () ==> Prompt
+    Prompt() ==
+    (
+        instructions := [];
+        context := [];
+        examples := [];
+        constraints := [];
+        outputFormat := [];
+    );
+
+    public isValid: () ==> bool
+    isValid() ==
+        return len instructions > 0 and len outputFormat > 0;
+
+    public static makeToken: TokenType * seq of char ==> Token
+        makeToken(t, v) ==
+            return mk_Token(t, v);
+
+
+    public addInstruction: Token ==> ()
+    addInstruction(tok) ==
+    (
+        instructions := instructions ^ [tok]
+    );
+
+    public addContext: Token ==> ()
+    addContext(tok) ==
+    (
+        context := context ^ [tok]
+    );
+    
+    public addExample: Token ==> ()
+    addExample(tok) ==
+    (
+        examples := examples ^ [tok]
+    );
+    
+    public addConstraint: Token ==> ()
+    addConstraint(tok) ==
+    (
+        constraints := constraints ^ [tok]
+    );
+    
+    public addOutputFormat: Token ==> ()
+    addOutputFormat(tok) ==
+    (
+        outputFormat := outputFormat ^ [tok]
+    );
+end Prompt

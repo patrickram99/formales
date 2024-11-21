@@ -1,0 +1,109 @@
+class TestPromptValidator
+
+instance variables
+    -- Instance variables for testing
+    private validator : PromptValidator := new PromptValidator();
+    private builder : PromptBuilder := new PromptBuilder();
+
+operations
+    -- Test the creation of a valid prompt
+    public testValidPrompt: () ==> bool
+    testValidPrompt() ==
+    (
+        -- Create tokens with valid types
+        dcl instruction : Prompt`Token := mk_Prompt`Token(<INSTRUCTION>, "Write a story about a hero.");
+        dcl context : Prompt`Token := mk_Prompt`Token(<CONTEXT>, "The story should be set in a medieval world.");
+        dcl example : Prompt`Token := mk_Prompt`Token(<EXAMPLE>, "Example: A knight saves a village.");
+        dcl constraint : Prompt`Token := mk_Prompt`Token(<CONSTRAINT>, "The story must include a dragon.");
+        dcl outputFormat : Prompt`Token := mk_Prompt`Token(<OUTPUT_FORMAT>, "Output as a short story.");
+
+        -- Build a valid prompt
+        dcl prompt : Prompt := builder
+            .addInstruction(instruction)
+            .addContext(context)
+            .addExample(example)
+            .addConstraint(constraint)
+            .addOutputFormat(outputFormat)
+            .build();
+
+        -- Validate the prompt
+        return validator.validate(prompt)
+    );
+
+    -- Test the creation of an invalid prompt (missing instruction)
+    public testInvalidPromptMissingInstruction: () ==> bool
+    testInvalidPromptMissingInstruction() ==
+    (
+        -- Create tokens with valid types but omit <INSTRUCTION>
+        dcl context : Prompt`Token := mk_Prompt`Token(<CONTEXT>, "The story should be set in a medieval world.");
+        dcl example : Prompt`Token := mk_Prompt`Token(<EXAMPLE>, "Example: A knight saves a village.");
+        dcl constraint : Prompt`Token := mk_Prompt`Token(<CONSTRAINT>, "The story must include a dragon.");
+        dcl outputFormat : Prompt`Token := mk_Prompt`Token(<OUTPUT_FORMAT>, "Output as a short story.");
+
+        -- Build an invalid prompt
+        dcl prompt : Prompt := builder
+            .addContext(context)
+            .addExample(example)
+            .addConstraint(constraint)
+            .addOutputFormat(outputFormat)
+            .build();
+
+        -- Validate the prompt (should return false since it's invalid)
+        return not validator.validate(prompt)
+    );
+
+    -- Test the creation of an invalid prompt (missing output format)
+    public testInvalidPromptMissingOutputFormat: () ==> bool
+    testInvalidPromptMissingOutputFormat() ==
+    (
+        -- Create tokens with valid types but omit <OUTPUT_FORMAT>
+        dcl instruction : Prompt`Token := mk_Prompt`Token(<INSTRUCTION>, "Write a story about a hero.");
+        dcl context : Prompt`Token := mk_Prompt`Token(<CONTEXT>, "The story should be set in a medieval world.");
+        dcl example : Prompt`Token := mk_Prompt`Token(<EXAMPLE>, "Example: A knight saves a village.");
+        dcl constraint : Prompt`Token := mk_Prompt`Token(<CONSTRAINT>, "The story must include a dragon.");
+
+        -- Build an invalid prompt
+        dcl prompt : Prompt := builder
+            .addInstruction(instruction)
+            .addContext(context)
+            .addExample(example)
+            .addConstraint(constraint)
+            .build();
+
+        -- Validate the prompt (should return false since it's invalid)
+        return not validator.validate(prompt)
+    );
+
+    -- Test the grammar rules
+    public testGrammarRules: () ==> bool
+    testGrammarRules() ==
+    (
+        -- Create tokens in an order that violates the grammar
+        dcl instruction : Prompt`Token := mk_Prompt`Token(<INSTRUCTION>, "Write a story about a hero.");
+        dcl outputFormat : Prompt`Token := mk_Prompt`Token(<OUTPUT_FORMAT>, "Output as a short story.");
+        dcl example : Prompt`Token := mk_Prompt`Token(<EXAMPLE>, "Example: A knight saves a village.");
+
+        -- Build a prompt with an invalid sequence
+        dcl prompt : Prompt := builder
+            .addInstruction(instruction)
+            .addOutputFormat(outputFormat)
+            .addExample(example)
+            .build();
+
+        -- Validate the prompt (should return false due to invalid sequence)
+        return not validator.validate(prompt)
+    );
+
+    -- Run all tests
+    public runTests: () ==> seq of bool
+    runTests() ==
+    (
+        return [
+            testValidPrompt(),
+            testInvalidPromptMissingInstruction(),
+            testInvalidPromptMissingOutputFormat(),
+            testGrammarRules()
+        ]
+    );
+
+end TestPromptValidator

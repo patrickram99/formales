@@ -1,0 +1,49 @@
+class PromptGrammar
+
+types
+    public Rule = seq of Prompt`TokenType;
+
+instance variables
+    private rules : set of Rule := {
+        [<INSTRUCTION>, <CONTEXT>, <EXAMPLE>, <CONSTRAINT>, <OUTPUT_FORMAT>],
+        [<INSTRUCTION>, <CONTEXT>, <CONSTRAINT>, <OUTPUT_FORMAT>],
+        [<INSTRUCTION>, <EXAMPLE>, <OUTPUT_FORMAT>]
+    };
+
+operations
+    public PromptGrammar: () ==> PromptGrammar
+    PromptGrammar() ==
+        return self;
+
+    public isValidPrompt: Prompt ==> bool
+    isValidPrompt(prompt) ==
+    (
+        let tokenSequence = createTokenSequence(prompt) in
+            return exists rule in set rules & 
+                   len tokenSequence = len rule and
+                   forall i in set {1,...,len tokenSequence} &
+                   tokenSequence(i).type = rule(i)
+    );
+
+    private createTokenSequence: Prompt ==> seq of Prompt`Token
+    createTokenSequence(prompt) ==
+    (
+        dcl result : seq of Prompt`Token := [];
+        if len prompt.instructions > 0 
+        then result := result ^ prompt.instructions;
+        if len prompt.context > 0 
+        then result := result ^ prompt.context;
+        if len prompt.examples > 0 
+        then result := result ^ prompt.examples;
+        if len prompt.constraints > 0 
+        then result := result ^ prompt.constraints;
+        if len prompt.outputFormat > 0 
+        then result := result ^ prompt.outputFormat;
+        return result
+    );
+
+    public addRule: Rule ==> ()
+    addRule(newRule) ==
+        rules := rules union {newRule};
+
+end PromptGrammar

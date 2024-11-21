@@ -1,0 +1,50 @@
+class PromptBuilder
+
+instance variables
+    private currentPrompt : Prompt := new Prompt();
+
+operations
+    public PromptBuilder: () ==> PromptBuilder
+    PromptBuilder() ==
+        return self;
+
+    public addInstruction: Prompt`Token ==> PromptBuilder
+    addInstruction(tok) ==
+    (
+        currentPrompt.instructions := currentPrompt.instructions ^ [tok];
+        return self;
+    );
+
+    public addContext: Prompt`Token ==> PromptBuilder
+    addContext(tok) ==
+    (
+        currentPrompt.context := currentPrompt.context ^ [tok];
+        return self;
+    );
+
+    public addExample: Prompt`Token ==> PromptBuilder
+    addExample(tok) ==
+    (
+        currentPrompt.examples := currentPrompt.examples ^ [tok];
+        return self;
+    );
+
+    public addConstraint: Prompt`Token ==> PromptBuilder
+    addConstraint(tok) ==
+    (
+        currentPrompt.constraints := currentPrompt.constraints ^ [tok];
+        return self;
+    );
+
+    public addOutputFormat: Prompt`Token ==> PromptBuilder
+    addOutputFormat(tok) ==
+    (
+        currentPrompt.outputFormat := currentPrompt.outputFormat ^ [tok];
+        return self;
+    );
+
+    public build: () ==> Prompt
+    build() ==
+        return currentPrompt;
+
+end PromptBuilder

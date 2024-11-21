@@ -1,0 +1,201 @@
+class ProjectTest
+
+types
+    -- Add any additional types if needed
+    public TestResult :: 
+        passed : bool
+        message : seq of char;
+
+instance variables
+    private prompt : Prompt;
+    private builder : PromptBuilder;
+    private grammar : PromptGrammar;
+    private validator : PromptValidator;
+    private testResults : seq of TestResult := [];
+
+operations
+    public ProjectTest: () ==> ProjectTest
+    ProjectTest() ==
+    (
+        prompt := new Prompt();
+        builder := new PromptBuilder();
+        grammar := new PromptGrammar();
+        validator := new PromptValidator();
+        return self
+    );
+
+    -- Helper function to create tokens
+    public static makeToken: Prompt`TokenType * seq of char ==> Prompt`Token
+    makeToken(tokenType, value) ==
+        return mk_Prompt`Token(tokenType, value);
+
+    -- Helper function to record test results
+    private recordTestResult: bool * seq of char ==> ()
+    recordTestResult(passed, message) ==
+        testResults := testResults ^ [mk_TestResult(passed, message)];
+
+    -- Function to get test results
+    public getTestResults: () ==> seq of TestResult
+    getTestResults() ==
+        return testResults;
+
+    -- Reset function for cleanup between tests
+    public reset: () ==> ()
+    reset() ==
+    (
+        prompt := new Prompt();
+        builder := new PromptBuilder();
+        grammar := new PromptGrammar();
+        validator := new PromptValidator();
+        testResults := [];
+    );
+
+traces
+    -- Enhanced Prompt Tests with more combinations
+    PromptTests: 
+        let inst = makeToken(<INSTRUCTION>, "test instruction"),
+            ctx = makeToken(<CONTEXT>, "test context"),
+            ex = makeToken(<EXAMPLE>, "test example"),
+            cons = makeToken(<CONSTRAINT>, "test constraint"),
+            outf = makeToken(<OUTPUT_FORMAT>, "test output format") in
+        (
+            -- Test individual component additions
+            (prompt.addInstruction(inst)) |
+            (prompt.addContext(ctx)) |
+            (prompt.addExample(ex)) |
+            (prompt.addConstraint(cons)) |
+            (prompt.addOutputFormat(outf));
+
+            -- Test validity checks
+            (prompt.addInstruction(inst);
+             prompt.addOutputFormat(outf);
+             prompt.isValid());
+
+            -- Test invalid combinations
+            (prompt.addContext(ctx);
+             prompt.isValid());
+
+            -- Test complete prompt
+            (prompt.addInstruction(inst);
+             prompt.addContext(ctx);
+             prompt.addExample(ex);
+             prompt.addConstraint(cons);
+             prompt.addOutputFormat(outf);
+             prompt.isValid())
+        );
+
+    -- Enhanced Builder Tests with error cases
+    BuilderTests:
+        let inst = makeToken(<INSTRUCTION>, "test instruction"),
+            ctx = makeToken(<CONTEXT>, "test context"),
+            ex = makeToken(<EXAMPLE>, "test example"),
+            cons = makeToken(<CONSTRAINT>, "test constraint"),
+            outf = makeToken(<OUTPUT_FORMAT>, "test output format") in
+        (
+            -- Test builder chain with all components
+            (builder.addInstruction(inst)
+                   .addContext(ctx)
+                   .addExample(ex)
+                   .addConstraint(cons)
+                   .addOutputFormat(outf)
+                   .build());
+
+            -- Test minimal valid prompt
+            (builder.addInstruction(inst)
+                   .addOutputFormat(outf)
+                   .build());
+
+            -- Test different combinations
+            (builder.addInstruction(inst)
+                   .addContext(ctx)
+                   .addOutputFormat(outf)
+                   .build()) |
+            (builder.addInstruction(inst)
+                   .addExample(ex)
+                   .addOutputFormat(outf)
+                   .build()) |
+            (builder.addInstruction(inst)
+                   .addConstraint(cons)
+                   .addOutputFormat(outf)
+                   .build())
+        );
+
+    -- Enhanced Grammar Tests with complex rules
+    GrammarTests:
+        let rule1 = [<INSTRUCTION>, <OUTPUT_FORMAT>],
+            rule2 = [<INSTRUCTION>, <CONTEXT>, <OUTPUT_FORMAT>],
+            rule3 = [<INSTRUCTION>, <EXAMPLE>, <CONSTRAINT>, <OUTPUT_FORMAT>],
+            rule4 = [<INSTRUCTION>, <CONTEXT>, <EXAMPLE>, <CONSTRAINT>, <OUTPUT_FORMAT>] in
+        (
+            -- Add rules sequentially
+            (grammar.addRule(rule1));
+            (grammar.addRule(rule2));
+            (grammar.addRule(rule3));
+            (grammar.addRule(rule4));
+
+            -- Test prompt validation against rules
+            let testPrompt = new Prompt(),
+                inst = makeToken(<INSTRUCTION>, "test"),
+                outf = makeToken(<OUTPUT_FORMAT>, "test") in
+            (
+                testPrompt.addInstruction(inst);
+                testPrompt.addOutputFormat(outf);
+                grammar.isValidPrompt(testPrompt)
+            )
+        );
+
+    -- Enhanced Validator Tests with comprehensive scenarios
+    ValidatorTests:
+        let inst = makeToken(<INSTRUCTION>, "test instruction"),
+            ctx = makeToken(<CONTEXT>, "test context"),
+            ex = makeToken(<EXAMPLE>, "test example"),
+            cons = makeToken(<CONSTRAINT>, "test constraint"),
+            outf = makeToken(<OUTPUT_FORMAT>, "test output format") in
+        (
+            -- Test all valid combinations
+            let p1 = builder.addInstruction(inst)
+                          .addOutputFormat(outf)
+                          .build() in
+            validator.validate(p1);
+
+            let p2 = builder.addInstruction(inst)
+                          .addContext(ctx)
+                          .addOutputFormat(outf)
+                          .build() in
+            validator.validate(p2);
+
+            let p3 = builder.addInstruction(inst)
+                          .addExample(ex)
+                          .addConstraint(cons)
+                          .addOutputFormat(outf)
+                          .build() in
+            validator.validate(p3)
+        );
+
+    -- Enhanced Integration Tests
+    IntegrationTests:
+        let inst = makeToken(<INSTRUCTION>, "test instruction"),
+            ctx = makeToken(<CONTEXT>, "test context"),
+            ex = makeToken(<EXAMPLE>, "test example"),
+            cons = makeToken(<CONSTRAINT>, "test constraint"),
+            outf = makeToken(<OUTPUT_FORMAT>, "test output format") in
+        (
+            -- Complete workflow test
+            (grammar.addRule([<INSTRUCTION>, <CONTEXT>, <EXAMPLE>, <OUTPUT_FORMAT>]);
+             let p = builder.addInstruction(inst)
+                          .addContext(ctx)
+                          .addExample(ex)
+                          .addOutputFormat(outf)
+                          .build() in
+             validator.validate(p));
+
+            -- Test with multiple rules
+            (grammar.addRule([<INSTRUCTION>, <CONSTRAINT>, <OUTPUT_FORMAT>]);
+             let p = builder.addInstruction(inst)
+                          .addConstraint(cons)
+                          .addOutputFormat(outf)
+                          .build() in
+             validator.validate(p))
+        );
+
+end ProjectTest
