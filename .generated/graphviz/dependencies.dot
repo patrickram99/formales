@@ -1,0 +1,11 @@
+digraph G {
+	PromptGrammar -> Prompt;
+	PromptBuilder -> Prompt;
+	PromptValidator -> PromptGrammar;
+	TestPromptValidator -> PromptBuilder;
+	TestPromptValidator -> PromptValidator;
+	ProjectTest -> PromptGrammar;
+	ProjectTest -> PromptBuilder;
+	ProjectTest -> PromptValidator;
+	ProjectTest -> Prompt;
+}
